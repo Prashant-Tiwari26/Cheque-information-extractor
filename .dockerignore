@@ -31,3 +31,4 @@ Thumbs.db
 logs/
 !logs/.gitkeep
 datasets/
+reports/

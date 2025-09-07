@@ -26,6 +26,7 @@ services:
       - ./logs:/app/logs
       - ./models:/app/models
       - model_cache:/app/.cache
+      - ./:/app
     dns:
       - 8.8.8.8
       - 8.8.4.4

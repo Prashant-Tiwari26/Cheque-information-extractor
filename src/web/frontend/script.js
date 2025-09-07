@@ -37,6 +37,18 @@ document.addEventListener('DOMContentLoaded', function() {
     downloadLabeledBtn.addEventListener('click', downloadLabeledImage);
     downloadAllBtn.addEventListener('click', downloadAllImages);
     
+    // Add file input change listener for visual feedback
+    const fileInput = document.getElementById('cheque-image');
+    const fileNameDisplay = document.getElementById('file-name');
+    
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            fileNameDisplay.textContent = this.files[0].name;
+        } else {
+            fileNameDisplay.textContent = 'No file chosen';
+        }
+    });
+    
     // Check if we have a task ID in URL (for direct links to results)
     const urlParams = new URLSearchParams(window.location.search);
     const taskIdParam = urlParams.get('task_id');
@@ -254,29 +266,53 @@ function downloadAllImages(event) {
         return;
     }
     
-    // Download labeled image
+    // Create a temporary array to hold all images to download
+    const imagesToDownload = [];
+    
+    // Add labeled image
     if (extractionResult.labeled_image) {
-        const labeledLink = document.createElement('a');
-        labeledLink.href = `data:image/jpeg;base64,${extractionResult.labeled_image}`;
-        labeledLink.download = 'labeled_cheque.jpg';
-        document.body.appendChild(labeledLink);
-        labeledLink.click();
-        document.body.removeChild(labeledLink);
+        imagesToDownload.push({
+            name: 'labeled_cheque.jpg',
+            data: extractionResult.labeled_image
+        });
     }
     
-    // Download cropped images
+    // Add cropped images
     if (extractionResult.detected_objects) {
         for (const [className, objectData] of Object.entries(extractionResult.detected_objects)) {
             if (objectData.cropped_image) {
-                const croppedLink = document.createElement('a');
-                croppedLink.href = `data:image/jpeg;base64,${objectData.cropped_image}`;
-                croppedLink.download = `${className}_cropped.jpg`;
-                document.body.appendChild(croppedLink);
-                croppedLink.click();
-                document.body.removeChild(croppedLink);
+                imagesToDownload.push({
+                    name: `${className}_cropped.jpg`,
+                    data: objectData.cropped_image
+                });
             }
         }
     }
+    
+    // If we only have one image, download it directly
+    if (imagesToDownload.length === 1) {
+        const image = imagesToDownload[0];
+        const link = document.createElement('a');
+        link.href = `data:image/jpeg;base64,${image.data}`;
+        link.download = image.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+    }
+    
+    // For multiple images, we'll trigger downloads with a small delay between each
+    // to avoid browser popup blockers
+    imagesToDownload.forEach((image, index) => {
+        setTimeout(() => {
+            const link = document.createElement('a');
+            link.href = `data:image/jpeg;base64,${image.data}`;
+            link.download = image.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }, index * 1000); // 1 second delay between downloads
+    });
 }
 
 // Show upload section
