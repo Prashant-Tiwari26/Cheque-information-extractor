@@ -1,2 +1,0 @@
-# yolo detect train data=src/models/trainer.yaml model=yolo11s.pt imgsz=640 batch=16 epochs=100 device=mps patience=15
-yolo detect train data=src/models/trainer.yaml model=yolo11s.pt imgsz=640 batch=32 epochs=150 device=mps patience=20

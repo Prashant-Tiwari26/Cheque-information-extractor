@@ -11,3 +11,5 @@ wheels/
 
 # others
 yolo11n.pt
+
+.env
